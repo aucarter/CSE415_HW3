@@ -1,0 +1,24 @@
+Austin Carter
+Filip Tomczak
+Agent file name
+"Assignment 3 for CSE 415, Winter 2020, University of Washington"
+
+Deterministic Simplified Backgammon Agent
+  Who did what for this agent.
+  How the static evaluation function works.
+  Any special considerations for Alpha-Beta pruning, such as
+    ordering of successors best-first.
+  Other comments on the implementation.
+
+Stochastic Simplified Backgammon Agent
+  Who did what for this agent.
+  Other comments on the implementation.
+
+Partnership retrospective.
+  What issues you faced or didn't face related to the
+    partnership.
+  Any lessons you learned as a result of working in this
+    partnership.
+
+Optional additional comments. (Comparing the versions,
+  insights on the games, or on the agents, for example).
