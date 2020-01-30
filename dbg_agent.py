@@ -3,7 +3,7 @@ This Backgammon player implements the Minimax and Alpha-Beta pruning algorithms
 in identifying the best move in the Deterministic Simplified Backgammon game.
 
 '''
-
+#%%
 from backgState import *
 from testStates import *
 
@@ -72,8 +72,38 @@ class Agent:
     net = r_dist - w_dist
     return(net)
 
-  def miniMax(state):
+  def miniMax(self, state, depth, maxTurn, die1, die2):
+    # admissible_moves = findAdmissibleMoves(state)
+    # if(depth == self.MAX_PLY):
+    #   ans = [m, staticEval()]
+    #   return
+    # if(maxTurn):
+    #   max([minimax(self, updateState(state, m), depth, False, die1, die2) for m in admissible_moves])
     pass
+
+  def findAdmissibleMoves(self, state, die1, die2):
+    # Identify the positions of the pieces
+    w_position = [i for i, e in enumerate(s.pointLists) if e.count(False) > 0]
+    r_position = [i for i, e in enumerate(s.pointLists) if e.count(True) > 0]
+
+    # Check if it is ok to move pieces off
+    off_possible = all([i > 17 for i in w_position])
+
+    # Identify moves that don't hit others pieces
+    if(off_possible):
+      w_d1_moves = [i for i in w_position if i + die1 not in r_position]
+      w_d2_moves = [i for i in w_position if i + die2 not in r_position]
+    else:
+      w_d1_moves = [i for i in w_position if i + die1 not in r_position and i + die1 < 24]
+      w_d2_moves = [i for i in w_position if i + die2 not in r_position and i + die2 < 24]
+
+    # Make all combinations of admissible moves
+    move_combos = [[i, j] for i in w_d1_moves for j in w_d2_moves]
+    # Remove combos that include moving two pieces from a position with only one
+    admissible_moves = [i for i in move_combos if not (i[0] == i[1] and s.pointLists[i[0]].count(False) < 2)]
+    
+    return(admissible_moves)
+
 
   def alphaBetaPrune(state):
     cutoff_found = False
@@ -81,18 +111,33 @@ class Agent:
       self.CUTOFFS += 1
 
   def move(state, die1, die2):
-    w = state.whose_move
-
+    ans = miniMax(state, die1, die2)
     return ans
   
-# test = Agent()
-# print(test.statesAndCutoffsCounts())
+test = Agent()
+print(test.statesAndCutoffsCounts())
 
-# s = bgstate()
-# print(s.whose_move)
+#%%
+s = bgstate()
+die1 = 1
+die2 = 6
+# Identify the positions of the pieces
+w_position = [i for i, e in enumerate(s.pointLists) if e.count(False) > 0]
+r_position = [i for i, e in enumerate(s.pointLists) if e.count(True) > 0]
 
-# print("Eval: " + str(test.staticEval(s)))
+# Check if it is ok to move pieces off
+off_possible = all([i > 17 for i in w_position])
 
-# print("Eval: " + str(test.staticEval(WHITE_ABOUT_TO_WIN)))
+# Identify moves that don't hit others pieces
+if(off_possible):
+  w_d1_moves = [i for i in w_position if i + die1 not in r_position]
+  w_d2_moves = [i for i in w_position if i + die2 not in r_position]
+else:
+  w_d1_moves = [i for i in w_position if i + die1 not in r_position and i + die1 < 24]
+  w_d2_moves = [i for i in w_position if i + die2 not in r_position and i + die2 < 24]
 
-# print("Eval: " + str(test.staticEval(WHITE_HIT_FROM_BAR)))
+# Make all combinations of admissible moves
+move_combos = [[i, j] for i in w_d1_moves for j in w_d2_moves]
+admissible_moves = [i for i in move_combos if s.pointLists[i[0]].count(False) > 1]
+return(admissible_moves)
+#%%
