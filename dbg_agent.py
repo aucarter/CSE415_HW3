@@ -3,7 +3,7 @@ This Backgammon player implements the Minimax and Alpha-Beta pruning algorithms
 in identifying the best move in the Deterministic Simplified Backgammon game.
 
 '''
-#%%
+
 from backgState import *
 from testStates import *
 
@@ -85,14 +85,14 @@ class Agent:
 
     return ans
   
-test = Agent()
-print(test.statesAndCutoffsCounts())
-#%%
-s = bgstate()
-print(s.whose_move)
+# test = Agent()
+# print(test.statesAndCutoffsCounts())
 
-print("Eval: " + str(test.staticEval(s)))
+# s = bgstate()
+# print(s.whose_move)
 
-print("Eval: " + str(test.staticEval(WHITE_ABOUT_TO_WIN)))
+# print("Eval: " + str(test.staticEval(s)))
 
-print("Eval: " + str(test.staticEval(WHITE_HIT_FROM_BAR)))
+# print("Eval: " + str(test.staticEval(WHITE_ABOUT_TO_WIN)))
+
+# print("Eval: " + str(test.staticEval(WHITE_HIT_FROM_BAR)))
