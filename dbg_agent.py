@@ -83,7 +83,7 @@ def miniMax(state, whose_move, max_depth, die1, die2, depth = 0):
   admis_moves = findAdmissibleMoves(state, whose_move, die1, die2)
 
   for m in admis_moves:
-    val = minimax(updateState(state, m), 1 - whose_move , die1, die2, depth + 1)
+    val = miniMax(updateState(state, m), 1 - whose_move , die1, die2, depth + 1)
     if(m == admis_moves[0]):
       best_val = val
       best_move = m
@@ -104,7 +104,7 @@ def miniMax(state, whose_move, max_depth, die1, die2, depth = 0):
 def findAdmissibleMoves(state, whose_move, die1, die2):
   ## Enumerate all possible moves
   # Identify the positions of the pieces
-  position = [i for i, e in enumerate(state.pointLists) if e.count(whose_move) > 0]
+  position = [i + 1 for i, e in enumerate(state.pointLists) if e.count(whose_move) > 0]
   # All combos that don't involve the same checker
   move_combos = [','.join((str(x), str(y))) for x in position for y in position if x != y]
   # Add in reverses
@@ -112,11 +112,11 @@ def findAdmissibleMoves(state, whose_move, die1, die2):
   # All same checker moves
   dice_list = [die1, die2]
   same_combos = [','.join((str(x),str(x + d))) for d in dice_list for x in position]
-  move_combos.append(same_combos)
+  move_combos.extend(same_combos)
   # Add in passes
   move_combos.append('p')
   pass_combos = [','.join((str(x),'p')) for x in position]
-  move_combos.append(pass_combos)
+  move_combos.extend(pass_combos)
 
   ## Remove combos that include moving two pieces from a position with only one
   admissible_moves = [i for i in move_combos if check_move(i, state, whose_move, die1, die2)]
@@ -136,6 +136,8 @@ def check_move (move, state, whose_move, die1, die2):
     dice_list = [die2, die1]
   else:
     dice_list = [die1, die2]
+  if move == 'p':
+    return True
   checker1, checker2 = move_list[:2]
   for i in range(2):
     pt = int([checker1, checker2][i])
@@ -190,6 +192,6 @@ def any_on_bar(state, who):
 #%%
 a = Agent()
 s = bgstate()
-miniMax(s, True, 3, 1, 6)
+miniMax(s, 0, 3, 1, 6)
 
 # %%
