@@ -62,109 +62,134 @@ class Agent:
     # force the agent of use the supplied evaluation function
     pass
 
-  def staticEval(self, state):
-    # Takes in state and returns a real number that is positive when good for
-    # maximizing player (white) and negative when relatively good for the 
-    # minimizing player (red)
-    
-    # Total distance of W pieces from being off
-    w_position = [i.count(False) for i in state.pointLists]
-    w_dist = sum([(i[0] + 1)*i[1] for i in enumerate(w_position)])
-    # Total distance of R pieces from being off
-    r_position = [i.count(True) for i in state.pointLists]
-    r_dist = sum([(len(r_position) - i[0])*i[1] for i in enumerate(r_position)])
-    # Take the net of the two, with R distance being positive and W being bad
-    net = r_dist - w_dist
-    return(net)
-
-  def miniMax(self, state, maxTurn, die1, die2, depth = 0):
-    # admissible_moves = findAdmissibleMoves(state)
-    # if(depth == self.MAX_PLY):
-    #   ans = [m, staticEval()]
-    #   return
-    # if(maxTurn):
-    #   max([minimax(self, updateState(state, m), depth, False, die1, die2) for m in admissible_moves])
-    pass
-
-  def findAdmissibleMoves(state, whose_move, die1, die2):
-    ## Enumerate all possible moves
-    # Identify the positions of the pieces
-    position = [i for i, e in enumerate(s.pointLists) if e.count(whose_move) > 0]
-    # All combos that don't involve the same checker
-    move_combos = [','.join(x, y) for x in position for y in position if x != y]
-    # Add in reverses
-    r_combos = [','.join(x, 'R') for x in move_combos]
-    # All same checker moves
-    dice_list = [die1, die2]
-    same_combos = [','.join(x,x + d) for d in dice_list for x in position]
-    move_combos.append(same_combos)
-    # Add in passes
-    move_combos.append('p')
-    pass_combos = [','.join(x,'p') for x in position]
-    move_combos.append(pass_combos)
-
-    ## Remove combos that include moving two pieces from a position with only one
-    admissible_moves = [i for i in move_combos if check_move(move, state, whose_move, dice_list)]
-    
-    return(admissible_moves)
-
-
-  def alphaBetaPrune(state):
-    cutoff_found = False
-    if(cutoff_found):
-      self.CUTOFFS += 1
+def staticEval(state):
+  # Takes in state and returns a real number that is positive when good for
+  # maximizing player (white) and negative when relatively good for the 
+  # minimizing player (red)
   
-  # Check if a move is allowed
-  def check_move (move, state, whose_move, dice_list):
-    move_list = move.split(',')
-    if len(move_list)==3 and move_list[2] in ['R','r']:
-      dice_list = [die2, die1]
+  # Total distance of W pieces from being off
+  w_position = [i.count(False) for i in state.pointLists]
+  w_dist = sum([(i[0] + 1)*i[1] for i in enumerate(w_position)])
+  # Total distance of R pieces from being off
+  r_position = [i.count(True) for i in state.pointLists]
+  r_dist = sum([(len(r_position) - i[0])*i[1] for i in enumerate(r_position)])
+  # Take the net of the two, with R distance being positive and W being bad
+  net = r_dist - w_dist
+  return(net)
+
+def miniMax(state, whose_move, max_depth, die1, die2, depth = 0):
+  if(depth == max_depth):
+    return staticEval(state)
+  admis_moves = findAdmissibleMoves(state, whose_move, die1, die2)
+
+  for m in admis_moves:
+    val = minimax(updateState(state, m), 1 - whose_move , die1, die2, depth + 1)
+    if(m == admis_moves[0]):
+      best_val = val
+      best_move = m
     else:
-      dice_list = [die1, die2]
-    checker1, checker2 = move_list[:2]
-    for i in range(2):
-      pt = int([checker1, checker2][i])
-      die = dice_list[i]
-      # Check first for a move from the bar:
-      if pt==0:
-        # Player must have a checker on the bar.
-        if not whose_move in state.bar:
-          return False
-        # Player must be able to move into place off bar
-        if whose_move=W: target_point=die
-        else: target_point=25-die
-        pointList = state.pointLists[target_point-1]
-        if pointList!=[] and pointList[0]!=who and len(pointList)>1:
-          return False
-        return True
-      # Now make sure player does NOT have a checker on the bar.
-      if any_on_bar(state, whose_move):
-        return False 
-      # Is checker available on point pt?
-      if pt < 1 or pt > 24:
-        return False
-      if not whose_move in state.pointLists[pt-1]:
-        return False
-      # Determine whether destination is legal.
-      if whose_move==W:
-        dest_pt = pt + die
+      if(whose_move == W):
+        if val > best_val:
+          best_val = val
+          best_move = m
       else:
-        dest_pt = pt - die
-      if dest_pt > 24 or dest_pt < 1:
-        return bearing_off_allowed(state, whose_move)
-      dest_pt_list = state.pointLists[dest_pt-1]
-      if len(dest_pt_list) > 1 and dest_pt_list[0]!=whose_move:
+        if val < best_val:   
+          best_val = val
+          best_move = m
+  if(depth == 0):
+    return best_move
+  else:
+    return best_val
+
+def findAdmissibleMoves(state, whose_move, die1, die2):
+  ## Enumerate all possible moves
+  # Identify the positions of the pieces
+  position = [i for i, e in enumerate(state.pointLists) if e.count(whose_move) > 0]
+  # All combos that don't involve the same checker
+  move_combos = [','.join((str(x), str(y))) for x in position for y in position if x != y]
+  # Add in reverses
+  r_combos = [','.join((str(x), 'R')) for x in move_combos]
+  # All same checker moves
+  dice_list = [die1, die2]
+  same_combos = [','.join((str(x),str(x + d))) for d in dice_list for x in position]
+  move_combos.append(same_combos)
+  # Add in passes
+  move_combos.append('p')
+  pass_combos = [','.join((str(x),'p')) for x in position]
+  move_combos.append(pass_combos)
+
+  ## Remove combos that include moving two pieces from a position with only one
+  admissible_moves = [i for i in move_combos if check_move(i, state, whose_move, die1, die2)]
+  
+  return(admissible_moves)
+
+
+def alphaBetaPrune(state):
+  cutoff_found = False
+  if(cutoff_found):
+    self.CUTOFFS += 1
+
+# Check if a move is allowed (we took most of this from gameMaster)
+def check_move (move, state, whose_move, die1, die2):
+  move_list = move.split(',')
+  if len(move_list)==3 and move_list[2] in ['R','r']:
+    dice_list = [die2, die1]
+  else:
+    dice_list = [die1, die2]
+  checker1, checker2 = move_list[:2]
+  for i in range(2):
+    pt = int([checker1, checker2][i])
+    die = dice_list[i]
+    # Check first for a move from the bar:
+    if pt==0:
+      # Player must have a checker on the bar.
+      if not whose_move in state.bar:
+        return False
+      # Player must be able to move into place off bar
+      if whose_move==W: 
+        target_point=die
+      else: 
+        target_point=25-die
+      pointList = state.pointLists[target_point-1]
+      if pointList!=[] and pointList[0]!=who and len(pointList)>1:
         return False
       return True
-
-  def bearing_off_allowed(state, who):
-    # True provided no checkers of this color on the bar or in
-    # first three quadrants.
-    if any_on_bar(state, who): return False
-    if who==W: point_range=range(0,18)
-    else: point_range=range(6,24)
-    pl = state.pointLists
-    for i in point_range:
-      if pl[i]==[]: continue
-      if pl[i][0]==who: return False
+    # Now make sure player does NOT have a checker on the bar.
+    if any_on_bar(state, whose_move):
+      return False 
+    # Is checker available on point pt?
+    if pt < 1 or pt > 24:
+      return False
+    if not whose_move in state.pointLists[pt-1]:
+      return False
+    # Determine whether destination is legal.
+    if whose_move==W:
+      dest_pt = pt + die
+    else:
+      dest_pt = pt - die
+    if dest_pt > 24 or dest_pt < 1:
+      return bearing_off_allowed(state, whose_move)
+    dest_pt_list = state.pointLists[dest_pt-1]
+    if len(dest_pt_list) > 1 and dest_pt_list[0]!=whose_move:
+      return False
     return True
+
+def bearing_off_allowed(state, who):
+  # True provided no checkers of this color on the bar or in
+  # first three quadrants.
+  if any_on_bar(state, who): return False
+  if who==W: point_range=range(0,18)
+  else: point_range=range(6,24)
+  pl = state.pointLists
+  for i in point_range:
+    if pl[i]==[]: continue
+    if pl[i][0]==who: return False
+  return True
+def any_on_bar(state, who):
+  return who in state.bar
+#%%
+a = Agent()
+s = bgstate()
+miniMax(s, True, 3, 1, 6)
+
+# %%

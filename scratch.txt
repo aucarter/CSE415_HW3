@@ -1,0 +1,19 @@
+miniMax 
+    # If at max depth, run staticEval on the state and return the number
+    # Figure out whose turn it is
+    # Identify admissible moves (function of state and whose turn it is)
+    # For each admissible move:
+        # Run miniMax on the updated state (Should return a single value)
+            - Increment the depth
+            - Swap whose turn it is
+    # If W, pick the max option. If R, pick the min option
+    # Return the move that wins at the top of your recursion
+
+
+Move options:
+- Pass
+- Pass after the first checker
+- Move from the bar (use 0 for this)
+    Must have a checker on the bar
+- Reverse the order of the die
+- Move the same checker twice (use as second argument the point number where the checker will be after first move)
