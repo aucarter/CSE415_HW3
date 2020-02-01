@@ -203,12 +203,6 @@ def updateState(state, m, die1, die2, whose_move):
   tempState.pointLists[pos2 - 1].pop()
   tempState.pointLists[dest2 - 1].append(whose_move)
   return tempState
-  # if whose_move==W:
-  #   dest_pt1 = pos1 + die1
-  #   dest_pt2 = pos2 + die2
-  # else:
-  #   dest_pt1 = pos1 - die1
-  #   dest_pt2 = pos2 - die2
 
 def getDest(pos, die, whose_move):
   return (pos + die) if (whose_move == W) else (pos - die)
