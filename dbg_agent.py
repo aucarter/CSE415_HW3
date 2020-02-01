@@ -133,8 +133,8 @@ def findAdmissibleMoves(state, whose_move, die1, die2):
       bar_combos = [','.join(('0', str(x))) for x in position]
       move_combos.extend(bar_combos)
       # add in where the checker ends up after getting moved off
-      move_combos.append(','.join('0', die1))
-      move_combos.append(','.join('0', die2))
+      move_combos.append(','.join(('0', str(die1))))
+      move_combos.append(','.join(('0', str(die2))))
     else:
       move_combos.append('0,0')
   ## Remove moves that are not admissible
@@ -169,7 +169,7 @@ def check_move (move, state, whose_move, die1, die2):
       else: 
         target_point=25-die
       pointList = tempState.pointLists[target_point-1]
-      if pointList!=[] and pointList[0]!=who and len(pointList)>1:
+      if pointList!=[] and pointList[0]!=whose_move and len(pointList)>1:
         return False
       return True
     # Now make sure player does NOT have a checker on the bar.
