@@ -197,41 +197,111 @@ def check_move (move, state, whose_move, die1, die2):
 def updateState(state, m, die1, die2, whose_move):
   tempState = bgstate(state)
   moves = m.split(',')
+  # move is pass
   if (len(moves) == 1):
     return state
-  pos1 = int(moves[0])
-  if (moves[1] == 'p'):
-    tempState.pointLists[pos1 - 1].pop()
-    dest1 = getDest(pos1, die1, whose_move)
-    if (dest1 > 24 and whose_move == W):
-      tempState.white_off.append(whose_move)
-    elif (dest1 < 1 and whose_move == R):
-      tempState.red_off.append(whose_move)
+  # not a reverse move
+  elif (len(moves) == 2):
+    pos1 = int(moves[0])
+    # check if move off the bar
+    if (pos1 == 0):
+      tempState.bar.remove(whose_move)
+      if (whose_move == W):
+        tempState.pointLists[die1 - 1].append(whose_move)
+      else:
+        tempState.pointLists[24 - die1].append(whose_move)
     else:
-      tempState.pointLists[dest1 - 1].append(whose_move)
-    return tempState
-  if (len(moves) == 3):
-    pos2 = pos1
+      tempState.pointLists[pos1 - 1].pop()
+      dest = getDest(pos1, die1, whose_move)
+      # check for bearing off
+      if (dest > 24 and whose_move == W):
+        tempState.white_off.append(whose_move)
+      elif (dest < 1 and whose_move == R):
+        tempState.red_off.append(whose_move)
+      else:
+        # check for hit
+        dest_pt_list = tempState.pointLists[dest - 1]
+        if (len(dest_pt_list) != 0 and dest_pt_list[0] != whose_move):
+          tempState.bar.append(dest_pt_list.pop())
+        tempState.pointLists[dest - 1].append(whose_move)
+    # pass on the second die
+    if (moves[1] == 'p'):
+      return tempState
+    # move on the second die
+    else:
+      pos2 = int(moves[1])
+      # check if move off the bar
+      if (pos2 == 0):
+        tempState.bar.remove(whose_move)
+        if (whose_move == W):
+          tempState.pointLists[die2 - 1].append(whose_move)
+        else:
+          tempState.pointLists[24 - die2].append(whose_move)
+      else:
+        tempState.pointLists[pos2 - 1].pop()
+        dest = getDest(pos2, die2, whose_move)
+        # check for bearing off
+        if (dest > 24 and whose_move == W):
+          tempState.white_off.append(whose_move)
+        elif (dest < 1 and whose_move == R):
+          tempState.red_off.append(whose_move)
+        else:
+          # check for hit
+          dest_pt_list = tempState.pointLists[dest - 1]
+          if (len(dest_pt_list) != 0 and dest_pt_list[0] != whose_move):
+            tempState.bar.append(dest_pt_list.pop())
+          tempState.pointLists[dest - 1].append(whose_move)
+      return tempState
+  # reverse move
+  else:
+    pos2 = int(moves[0])  
     pos1 = int(moves[1])
-  else:
-    pos2 = int(moves[1])
-  dest1 = getDest(pos1, die1, whose_move)
-  dest2 = getDest(pos2, die2, whose_move)
-  tempState.pointLists[pos1 - 1].pop()
-  if (dest1 > 24 and whose_move == W):
-    tempState.white_off.append(whose_move)
-  elif (dest1 < 1 and whose_move == R):
-    tempState.red_off.append(whose_move)
-  else:
-    tempState.pointLists[dest1 - 1].append(whose_move)
-  tempState.pointLists[pos2 - 1].pop()
-  if (dest2 > 24 and whose_move == W):
-    tempState.white_off.append(whose_move)
-  elif (dest2 < 1 and whose_move == R):
-    tempState.red_off.append(whose_move)
-  else:
-    tempState.pointLists[dest2 - 1].append(whose_move)
-  return tempState
+    dest1 = getDest(pos1, die1, whose_move)
+    # check if move off the bar
+    if (pos2 == 0):
+      tempState.bar.remove(whose_move)
+      if (whose_move == W):
+        tempState.pointLists[die2 - 1].append(whose_move)
+      else:
+        tempState.pointLists[24 - die2].append(whose_move)
+      # move the second one
+      tempState.pointLists[pos1 - 1].pop()
+      if (dest1 > 24 and whose_move == W):
+        tempState.white_off.append(whose_move)
+      elif (dest1 < 1 and whose_move == R):
+        tempState.red_off.append(whose_move)
+      else:
+        # check for hit
+        dest_pt_list = tempState.pointLists[dest1 - 1]
+        if (len(dest_pt_list) != 0 and dest_pt_list[0] != whose_move):
+          tempState.bar.append(dest_pt_list.pop())
+        tempState.pointLists[dest1 - 1].append(whose_move)
+    # regular reverse move
+    else:
+      dest2 = getDest(pos2, die2, whose_move)
+      tempState.pointLists[pos1 - 1].pop()
+      if (dest1 > 24 and whose_move == W):
+        tempState.white_off.append(whose_move)
+      elif (dest1 < 1 and whose_move == R):
+        tempState.red_off.append(whose_move)
+      else:
+        # check for hit
+        dest_pt_list = tempState.pointLists[dest1 - 1]
+        if (len(dest_pt_list) != 0 and dest_pt_list[0] != whose_move):
+          tempState.bar.append(dest_pt_list.pop())
+        tempState.pointLists[dest1 - 1].append(whose_move)
+      tempState.pointLists[pos2 - 1].pop()
+      if (dest2 > 24 and whose_move == W):
+        tempState.white_off.append(whose_move)
+      elif (dest2 < 1 and whose_move == R):
+        tempState.red_off.append(whose_move)
+      else:
+        # check for hit
+        dest_pt_list = tempState.pointLists[dest2 - 1]
+        if (len(dest_pt_list) != 0 and dest_pt_list[0] != whose_move):
+          tempState.bar.append(dest_pt_list.pop())
+        tempState.pointLists[dest2 - 1].append(whose_move)
+      return tempState
 
 
 def getDest(pos, die, whose_move):
