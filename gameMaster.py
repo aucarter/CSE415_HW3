@@ -53,7 +53,7 @@ outcomes.  This is useful in terms of allowing alpha-beta pruning to
 make sense.
 '''
 
-import dbg_agent as agent1
+import BackMan as agent1
 #import McGammon as agent2
 import BackMan as agent2
 TIME_LIMIT=3.0 # 2 seconds.

@@ -61,6 +61,42 @@ class Agent:
   def useSpecialStaticEval(self, func):
     # force the agent of use the supplied evaluation function
     pass
+  
+  def miniMax(self, state, whose_move, max_depth, die1, die2, alpha = -1e10, beta = 1e10, depth = 0):
+    if(depth == max_depth):
+      return staticEval(state)
+    admis_moves = findAdmissibleMoves(state, whose_move, die1, die2)
+    for m in admis_moves:
+      val = self.miniMax(updateState(state, m), 1 - whose_move , die1, die2, depth + 1)
+      self.STATES += 1
+      if(m == admis_moves[0]):
+        best_val = val
+        best_move = m
+      else:
+        if(whose_move == W):
+          if val > best_val:
+            best_val = val
+            best_move = m
+            if self.A_B:
+              if best_val >= beta:
+                self.CUTOFFS += 1
+                break
+              if best_val > alpha:
+                alpha = best_val
+        else:
+          if val < best_val:   
+            best_val = val
+            best_move = m
+            if self.A_B:
+              if best_val <= alpha:
+                self.CUTOFFS += 1
+                break
+              if best_val < beta:
+                beta = best_val            
+    if(depth == 0):
+      return best_move
+    else:
+      return best_val
 
 def staticEval(state):
   # Takes in state and returns a real number that is positive when good for
@@ -77,29 +113,7 @@ def staticEval(state):
   net = r_dist - w_dist
   return(net)
 
-def miniMax(state, whose_move, max_depth, die1, die2, depth = 0):
-  if(depth == max_depth):
-    return staticEval(state)
-  admis_moves = findAdmissibleMoves(state, whose_move, die1, die2)
 
-  for m in admis_moves:
-    val = miniMax(updateState(state, m), 1 - whose_move , die1, die2, depth + 1)
-    if(m == admis_moves[0]):
-      best_val = val
-      best_move = m
-    else:
-      if(whose_move == W):
-        if val > best_val:
-          best_val = val
-          best_move = m
-      else:
-        if val < best_val:   
-          best_val = val
-          best_move = m
-  if(depth == 0):
-    return best_move
-  else:
-    return best_val
 
 def findAdmissibleMoves(state, whose_move, die1, die2):
   ## Enumerate all possible moves
@@ -187,11 +201,12 @@ def bearing_off_allowed(state, who):
     if pl[i]==[]: continue
     if pl[i][0]==who: return False
   return True
+
 def any_on_bar(state, who):
   return who in state.bar
 #%%
 a = Agent()
 s = bgstate()
-miniMax(s, 0, 3, 1, 6)
+a.miniMax(state = s, whose_move = 1, max_depth = 3, die1 = 1, die2 = 6, alpha = -1e10, beta = 1e10, depth = 0)
 
 # %%
