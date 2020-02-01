@@ -67,7 +67,7 @@ class Agent:
       return staticEval(state)
     admis_moves = findAdmissibleMoves(state, whose_move, die1, die2)
     for m in admis_moves:
-      val = self.miniMax(updateState(state, m), 1 - whose_move , die1, die2, depth + 1)
+      val = self.miniMax(updateState(state, m, die1, die2, whose_move), 1 - whose_move , die1, die2, depth + 1)
       self.STATES += 1
       if(m == admis_moves[0]):
         best_val = val
@@ -191,7 +191,7 @@ def check_move (move, state, whose_move, die1, die2):
     if len(dest_pt_list) > 1 and dest_pt_list[0]!=whose_move:
       return False
     if(i == 0):
-      state = updateState(state, ...)
+      state = updateState(state, ','.join((checker1, 'p')), die1, die2, whose_move)
   return True
 
 def updateState(state, m, die1, die2, whose_move):
