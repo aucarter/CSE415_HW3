@@ -53,9 +53,9 @@ outcomes.  This is useful in terms of allowing alpha-beta pruning to
 make sense.
 '''
 
-import BackMan as agent1
-#import McGammon as agent2
-import BackMan as agent2
+import dbg_agent
+agent1 = dbg_agent.Agent()
+agent2 = dbg_agent.Agent()
 TIME_LIMIT=3.0 # 2 seconds.
 
 DETERMINISTIC = True

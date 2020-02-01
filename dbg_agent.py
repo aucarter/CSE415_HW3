@@ -37,9 +37,9 @@ class Agent:
   def __hash__(self):
     return (self.__str__()).__hash__()
 
-  def move(state, die1, die2):
+  def move(self, state, die1, die2):
     # Returns the best move found through miniMax algorithm
-    ans = miniMax(state, die1, die2)
+    ans = self.miniMax(state = state, whose_move = state.whose_move, max_depth = 3, die1 = die1, die2 = die2, alpha = -1e10, beta = 1e10, depth = 0)
     return ans
   
   def useAlphaBetaPruning(self, prune=False):
@@ -245,6 +245,9 @@ def any_on_bar(state, who):
 
 a = Agent()
 s = bgstate()
-print(a.miniMax(state = s, whose_move = 1, max_depth = 3, die1 = 1, die2 = 6, alpha = -1e10, beta = 1e10, depth = 0))
+a.A_B = True
+print(a.miniMax(state = s, whose_move = 0, max_depth = 3, die1 = 1, die2 = 6, alpha = -1e10, beta = 1e10, depth = 0))
+print(a.CUTOFFS)
+print(a.STATES)
 
 
