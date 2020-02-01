@@ -105,10 +105,10 @@ def staticEval(state):
   
   # Total distance of W pieces from being off
   w_position = [i.count(False) for i in state.pointLists]
-  w_dist = sum([(i[0] + 1)*i[1] for i in enumerate(w_position)])
+  w_dist = sum([(24 - i[0])*i[1] for i in enumerate(w_position)])
   # Total distance of R pieces from being off
   r_position = [i.count(True) for i in state.pointLists]
-  r_dist = sum([(len(r_position) - i[0])*i[1] for i in enumerate(r_position)])
+  r_dist = sum([(i[0] + 1)*i[1] for i in enumerate(r_position)])
   # Take the net of the two, with R distance being positive and W being bad
   net = r_dist - w_dist
   return(net)
