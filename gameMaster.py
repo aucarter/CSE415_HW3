@@ -58,7 +58,7 @@ agent1 = dbg_agent.Agent()
 agent2 = dbg_agent.Agent()
 TIME_LIMIT=3.0 # 2 seconds.
 
-DETERMINISTIC = False
+DETERMINISTIC = True
 # for the deterministic version, where the dice are loaded in a way
 # that prevents all randomness.
 
