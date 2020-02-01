@@ -126,7 +126,16 @@ def findAdmissibleMoves(state, whose_move, die1, die2):
   move_combos.append('p')
   pass_combos = [','.join((str(x),'p')) for x in position]
   move_combos.extend(pass_combos)
-
+  # Add in moves off of the bar
+  if whose_move in state.bar:
+    if(state.bar.count(whose_move) == 1):
+      bar_combos = [','.join(('0', str(x))) for x in position]
+      move_combos.extend(bar_combos)
+      # add in where the checker ends up after getting moved off
+      move_combos.append(','.join('0', die1))
+      move_combos.append(','.join('0', die2))
+    else:
+      move_combos.append('0,0')
   ## Remove combos that include moving two pieces from a position with only one
   admissible_moves = [i for i in move_combos if check_move(i, state, whose_move, die1, die2)]
   
