@@ -190,7 +190,42 @@ def check_move (move, state, whose_move, die1, die2):
     dest_pt_list = state.pointLists[dest_pt-1]
     if len(dest_pt_list) > 1 and dest_pt_list[0]!=whose_move:
       return False
-    return True
+    if(i == 0):
+      state = updateState(state, ...)
+  return True
+
+def updateState(state, m, die1, die2, whose_move):
+  tempState = state
+  moves = m.split(',')
+  if (len(moves) == 1):
+    return state
+  pos1 = int(moves[0])
+  if (moves[1] == 'p'):
+    tempState.pointLists[pos1 - 1].pop()
+    dest1 = getDest(pos1, die1, whose_move)
+    tempState.pointLists[dest1 - 1].append(whose_move)
+    return tempState
+  if (len(moves) == 3):
+    pos2 = pos1
+    pos1 = int(moves[1])
+  else:
+    pos2 = int(moves[1])
+  dest1 = getDest(pos1, die1, whose_move)
+  dest2 = getDest(pos2, die2, whose_move)
+  tempState.pointLists[pos1 - 1].pop()
+  tempState.pointLists[pos2 - 1].pop()
+  tempState.pointLists[dest1 - 1].append(whose_move)
+  tempState.pointLists[dest2 - 1].append(whose_move)
+  return tempState
+  # if whose_move==W:
+  #   dest_pt1 = pos1 + die1
+  #   dest_pt2 = pos2 + die2
+  # else:
+  #   dest_pt1 = pos1 - die1
+  #   dest_pt2 = pos2 - die2
+
+def getDest(pos, die, whose_move):
+  return (pos + die) if (whose_move == W) else (pos - die)
 
 def bearing_off_allowed(state, who):
   # True provided no checkers of this color on the bar or in
