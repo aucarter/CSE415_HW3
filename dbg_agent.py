@@ -1,17 +1,12 @@
 '''dbg_agent.py
 This Backgammon player implements the Minimax and Alpha-Beta pruning algorithms
 in identifying the best move in the Deterministic Simplified Backgammon game.
-
 '''
-#%%
+
 from backgState import *
 from testStates import *
 
 # Define a class for agent
-
-# Implement two counter variables:
-#   1) Number of states created by agent
-#   2) Number of cutoffs made by Alpha-Beta pruning
 class Agent:
   def __init__(self):
     # Instance variables for the number of states created and cutoffs made

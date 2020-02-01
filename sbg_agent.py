@@ -8,17 +8,10 @@ from backgState import *
 from testStates import *
 
 # Define a class for agent
-
-# Implement two counter variables:
-#   1) Number of states created by agent
-#   2) Number of cutoffs made by Alpha-Beta pruning
 class Agent:
   def __init__(self):
-    # Instance variables for the number of states created and cutoffs made
+    # Instance variables for the number of states created
     self.STATES = 0
-    self.CUTOFFS = 0
-    # Variable for whether or not to use Alpha-Beta pruning
-    self.A_B = False
     # Variable for limit on depth of agent's searxh
     self.MAX_PLY = -1
 
@@ -53,41 +46,35 @@ class Agent:
   def useUniformDistribution(self):
     pass
   
-  def expectiMiniMax(self, state, whose_move, max_depth, die1, die2, alpha = -1e10, beta = 1e10, depth = 0):
+  def expectiMiniMax(self, state, whose_move, max_depth, die1, die2, depth = 0):
     if(depth == max_depth):
       return staticEval(state)
     admis_moves = findAdmissibleMoves(state, whose_move, die1, die2)
     for m in admis_moves:
-      val = self.expectiMiniMax(updateState(state, m, die1, die2, whose_move), 1 - whose_move, max_depth, die1, die2, alpha, beta, depth + 1)
-      self.STATES += 1
-      if(m == admis_moves[0]):
-        best_val = val
-        best_move = m
-      else:
-        if(whose_move == W):
-          if val > best_val:
+      val = 0
+      for die1 in range(1, 6):
+        for die2 in range(1, 6):
+          val += checkProb(die1, die2) * self.expectiMiniMax(updateState(state, m, die1, die2, whose_move), 1 - whose_move, max_depth, die1, die2, alpha, beta, depth + 1)
+          self.STATES += 1
+          if(m == admis_moves[0]):
             best_val = val
             best_move = m
-            if self.A_B:
-              if best_val >= beta:
-                self.CUTOFFS += 1
-                break
-              if best_val > alpha:
-                alpha = best_val
-        else:
-          if val < best_val:   
-            best_val = val
-            best_move = m
-            if self.A_B:
-              if best_val <= alpha:
-                self.CUTOFFS += 1
-                break
-              if best_val < beta:
-                beta = best_val            
+          else:
+            if(whose_move == W):
+              if val > best_val:
+                best_val = val
+                best_move = m
+            else:
+              if val < best_val:   
+                best_val = val
+                best_move = m  
     if(depth == 0):
       return best_move
     else:
       return best_val
+    
+    def checkProb(die1, die2):
+      return 1.0 / 36
 
 def staticEval(state):
   # Takes in state and returns a real number that is positive when good for
