@@ -137,12 +137,6 @@ def findAdmissibleMoves(state, whose_move, die1, die2):
   
   return(admissible_moves)
 
-
-def alphaBetaPrune(state):
-  cutoff_found = False
-  if(cutoff_found):
-    self.CUTOFFS += 1
-
 # Check if a move is allowed (we took most of this from gameMaster)
 def check_move (move, state, whose_move, die1, die2):
   move_list = move.split(',')
@@ -242,12 +236,3 @@ def bearing_off_allowed(state, who):
 
 def any_on_bar(state, who):
   return who in state.bar
-
-a = Agent()
-s = bgstate()
-a.A_B = True
-print(a.miniMax(state = s, whose_move = 0, max_depth = 3, die1 = 1, die2 = 6, alpha = -1e10, beta = 1e10, depth = 0))
-print(a.CUTOFFS)
-print(a.STATES)
-
-
