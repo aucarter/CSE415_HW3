@@ -3,7 +3,7 @@ This Backgammon player implements the expectiMinimax and Alpha-Beta pruning algo
 in identifying the best move in the Deterministic Simplified Backgammon game.
 
 '''
-#%%
+
 from backgState import *
 from testStates import *
 
@@ -52,9 +52,11 @@ class Agent:
     admis_moves = findAdmissibleMoves(state, whose_move, die1, die2)
     for m in admis_moves:
       val = 0
+      prev_die1 = die1
+      prev_die2 = die2
       for die1 in range(1, 7):
         for die2 in range(1, 7):
-          val += checkProb(die1, die2) * self.expectiMiniMax(updateState(state, m, die1, die2, whose_move), 1 - whose_move, max_depth, die1, die2, depth + 1)
+          val += checkProb(die1, die2) * self.expectiMiniMax(updateState(state, m, prev_die1, prev_die2, whose_move), 1 - whose_move, max_depth, die1, die2, depth + 1)
           self.STATES += 1
           if(m == admis_moves[0]):
             best_val = val
