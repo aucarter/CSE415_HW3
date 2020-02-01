@@ -186,7 +186,12 @@ def updateState(state, m, die1, die2, whose_move):
   if (moves[1] == 'p'):
     tempState.pointLists[pos1 - 1].pop()
     dest1 = getDest(pos1, die1, whose_move)
-    tempState.pointLists[dest1 - 1].append(whose_move)
+    if (dest1 > 24 and whose_move == W):
+      tempState.white_off.append(whose_move)
+    elif (dest1 < 1 and whose_move == R):
+      tempState.red_off.append(whose_move)
+    else:
+      tempState.pointLists[dest1 - 1].append(whose_move)
     return tempState
   if (len(moves) == 3):
     pos2 = pos1
@@ -196,9 +201,19 @@ def updateState(state, m, die1, die2, whose_move):
   dest1 = getDest(pos1, die1, whose_move)
   dest2 = getDest(pos2, die2, whose_move)
   tempState.pointLists[pos1 - 1].pop()
-  tempState.pointLists[dest1 - 1].append(whose_move)
+  if (dest1 > 24 and whose_move == W):
+    tempState.white_off.append(whose_move)
+  elif (dest1 < 1 and whose_move == R):
+    tempState.red_off.append(whose_move)
+  else:
+    tempState.pointLists[dest1 - 1].append(whose_move)
   tempState.pointLists[pos2 - 1].pop()
-  tempState.pointLists[dest2 - 1].append(whose_move)
+  if (dest2 > 24 and whose_move == W):
+    tempState.white_off.append(whose_move)
+  elif (dest2 < 1 and whose_move == R):
+    tempState.red_off.append(whose_move)
+  else:
+    tempState.pointLists[dest2 - 1].append(whose_move)
   return tempState
 
 def getDest(pos, die, whose_move):
