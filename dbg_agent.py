@@ -67,7 +67,7 @@ class Agent:
       return staticEval(state)
     admis_moves = findAdmissibleMoves(state, whose_move, die1, die2)
     for m in admis_moves:
-      val = self.miniMax(updateState(state, m, die1, die2, whose_move), 1 - whose_move , die1, die2, depth + 1)
+      val = self.miniMax(updateState(state, m, die1, die2, whose_move), 1 - whose_move, max_depth, die1, die2, alpha, beta, depth + 1)
       self.STATES += 1
       if(m == admis_moves[0]):
         best_val = val
@@ -153,6 +153,7 @@ def check_move (move, state, whose_move, die1, die2):
   if move == 'p':
     return True
   checker1, checker2 = move_list[:2]
+  tempState = bgstate(state)
   for i in range(2):
     if i == 1 and checker2 == 'p':
       return True
@@ -161,24 +162,24 @@ def check_move (move, state, whose_move, die1, die2):
     # Check first for a move from the bar:
     if pt==0:
       # Player must have a checker on the bar.
-      if not whose_move in state.bar:
+      if not whose_move in tempState.bar:
         return False
       # Player must be able to move into place off bar
       if whose_move==W: 
         target_point=die
       else: 
         target_point=25-die
-      pointList = state.pointLists[target_point-1]
+      pointList = tempState.pointLists[target_point-1]
       if pointList!=[] and pointList[0]!=who and len(pointList)>1:
         return False
       return True
     # Now make sure player does NOT have a checker on the bar.
-    if any_on_bar(state, whose_move):
+    if any_on_bar(tempState, whose_move):
       return False 
     # Is checker available on point pt?
     if pt < 1 or pt > 24:
       return False
-    if not whose_move in state.pointLists[pt-1]:
+    if not whose_move in tempState.pointLists[pt-1]:
       return False
     # Determine whether destination is legal.
     if whose_move==W:
@@ -186,16 +187,16 @@ def check_move (move, state, whose_move, die1, die2):
     else:
       dest_pt = pt - die
     if dest_pt > 24 or dest_pt < 1:
-      return bearing_off_allowed(state, whose_move)
-    dest_pt_list = state.pointLists[dest_pt-1]
+      return bearing_off_allowed(tempState, whose_move)
+    dest_pt_list = tempState.pointLists[dest_pt-1]
     if len(dest_pt_list) > 1 and dest_pt_list[0]!=whose_move:
       return False
     if(i == 0):
-      state = updateState(state, ','.join((checker1, 'p')), die1, die2, whose_move)
+      tempState = updateState(tempState, ','.join((checker1, 'p')), die1, die2, whose_move)
   return True
 
 def updateState(state, m, die1, die2, whose_move):
-  tempState = state
+  tempState = bgstate(state)
   moves = m.split(',')
   if (len(moves) == 1):
     return state
@@ -213,8 +214,8 @@ def updateState(state, m, die1, die2, whose_move):
   dest1 = getDest(pos1, die1, whose_move)
   dest2 = getDest(pos2, die2, whose_move)
   tempState.pointLists[pos1 - 1].pop()
-  tempState.pointLists[pos2 - 1].pop()
   tempState.pointLists[dest1 - 1].append(whose_move)
+  tempState.pointLists[pos2 - 1].pop()
   tempState.pointLists[dest2 - 1].append(whose_move)
   return tempState
   # if whose_move==W:
@@ -241,9 +242,9 @@ def bearing_off_allowed(state, who):
 
 def any_on_bar(state, who):
   return who in state.bar
-#%%
+
 a = Agent()
 s = bgstate()
-a.miniMax(state = s, whose_move = 1, max_depth = 3, die1 = 1, die2 = 6, alpha = -1e10, beta = 1e10, depth = 0)
+print(a.miniMax(state = s, whose_move = 1, max_depth = 3, die1 = 1, die2 = 6, alpha = -1e10, beta = 1e10, depth = 0))
 
-# %%
+
