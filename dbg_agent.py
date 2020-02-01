@@ -120,7 +120,10 @@ def findAdmissibleMoves(state, whose_move, die1, die2):
   r_combos = [','.join((str(x), 'R')) for x in move_combos]
   # All same checker moves
   dice_list = [die1, die2]
-  same_combos = [','.join((str(x),str(x + d))) for d in dice_list for x in position]
+  if whose_move == W:
+    same_combos = [','.join((str(x),str(x + d))) for d in dice_list for x in position]
+  else:
+    same_combos = [','.join((str(x),str(x - d))) for d in dice_list for x in position]
   move_combos.extend(same_combos)
   # Add in passes
   move_combos.append('p')
@@ -133,8 +136,12 @@ def findAdmissibleMoves(state, whose_move, die1, die2):
       bar_combos = [','.join(('0', str(x))) for x in position]
       move_combos.extend(bar_combos)
       # add in where the checker ends up after getting moved off
-      move_combos.append(','.join(('0', str(die1))))
-      move_combos.append(','.join(('0', str(die2))))
+      if whose_move == W:
+        move_combos.append(','.join(('0', str(die1))))
+        move_combos.append(','.join(('0', str(die2))))
+      else:
+        move_combos.append(','.join(('0', str(24 - die1 + 1))))
+        move_combos.append(','.join(('0', str(24 - die2 + 2))))        
     else:
       move_combos.append('0,0')
   ## Remove moves that are not admissible
