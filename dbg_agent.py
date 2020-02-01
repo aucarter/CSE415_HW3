@@ -154,6 +154,8 @@ def check_move (move, state, whose_move, die1, die2):
     return True
   checker1, checker2 = move_list[:2]
   for i in range(2):
+    if i == 1 and checker2 == 'p':
+      return True
     pt = int([checker1, checker2][i])
     die = dice_list[i]
     # Check first for a move from the bar:
