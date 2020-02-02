@@ -141,7 +141,7 @@ def findAdmissibleMoves(state, whose_move, die1, die2):
         move_combos.append(','.join(('0', str(die2))))
       else:
         move_combos.append(','.join(('0', str(24 - die1 + 1))))
-        move_combos.append(','.join(('0', str(24 - die2 + 2))))        
+        move_combos.append(','.join(('0', str(24 - die2 + 1))))        
     else:
       move_combos.append('0,0')
   ## Remove moves that are not admissible
@@ -178,27 +178,30 @@ def check_move (move, state, whose_move, die1, die2):
       pointList = tempState.pointLists[target_point-1]
       if pointList!=[] and pointList[0]!=whose_move and len(pointList)>1:
         return False
-      return True
+      # return True
     # Now make sure player does NOT have a checker on the bar.
-    if any_on_bar(tempState, whose_move):
-      return False 
-    # Is checker available on point pt?
-    if pt < 1 or pt > 24:
-      return False
-    if not whose_move in tempState.pointLists[pt-1]:
-      return False
-    # Determine whether destination is legal.
-    if whose_move==W:
-      dest_pt = pt + die
     else:
-      dest_pt = pt - die
-    if dest_pt > 24 or dest_pt < 1:
-      return bearing_off_allowed(tempState, whose_move)
-    dest_pt_list = tempState.pointLists[dest_pt-1]
-    if len(dest_pt_list) > 1 and dest_pt_list[0]!=whose_move:
-      return False
-    if(i == 0):
-      tempState = updateState(tempState, ','.join((checker1, 'p')), die1, die2, whose_move)
+      if any_on_bar(tempState, whose_move):
+        return False 
+      # Is checker available on point pt?
+      elif pt < 1 or pt > 24:
+        return False
+      elif not whose_move in tempState.pointLists[pt-1]:
+        return False
+      # Determine whether destination is legal.
+      if whose_move==W:
+        dest_pt = pt + die
+      else:
+        dest_pt = pt - die
+      if dest_pt > 24 or dest_pt < 1:
+        return False
+      if (((not whose_move and dest_pt == 24) or (whose_move and dest_pt == 1)) and i == 1):
+        return bearing_off_allowed(tempState, whose_move)
+      dest_pt_list = tempState.pointLists[dest_pt-1]
+      if len(dest_pt_list) > 1 and dest_pt_list[0]!=whose_move:
+        return False
+      if(i == 0):
+        tempState = updateState(tempState, ','.join((checker1, 'p')), die1, die2, whose_move)
   return True
 
 def updateState(state, m, die1, die2, whose_move):
