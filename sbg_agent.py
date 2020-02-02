@@ -77,13 +77,12 @@ class Agent:
     
 def checkProb(die1, die2):
   return 1.0 / 36
-
 def staticEval(state):
   # Takes in state and returns a real number that is positive when good for
   # maximizing player (white) and negative when relatively good for the 
   # minimizing player (red)
   
-  # Total distance of W pieces from being off
+  ## Total distance of W pieces from being off
   w_position = [i.count(False) for i in state.pointLists]
   w_dist = sum([(24 - i[0])*i[1] for i in enumerate(w_position)])
   # Total distance of R pieces from being off
@@ -91,8 +90,15 @@ def staticEval(state):
   r_dist = sum([(i[0] + 1)*i[1] for i in enumerate(r_position)])
   # Take the net of the two, with R distance being positive and W being bad
   net = r_dist - w_dist
-  return(net)
 
+  ## Number on the bar
+  net += state.bar.count(W)*-24
+  net += state.bar.count(R)*24
+
+  ## Number off
+  net += len(state.white_off)*25
+  net += len(state.red_off)*-25
+  return(net)
 
 def findAdmissibleMoves(state, whose_move, die1, die2):
   ## Enumerate all possible moves
@@ -100,8 +106,6 @@ def findAdmissibleMoves(state, whose_move, die1, die2):
   position = [i + 1 for i, e in enumerate(state.pointLists) if e.count(whose_move) > 0]
   # All combos that don't involve the same checker
   move_combos = [','.join((str(x), str(y))) for x in position for y in position if x != y]
-  # Add in reverses
-  r_combos = [','.join((str(x), 'R')) for x in move_combos]
   # All same checker moves
   dice_list = [die1, die2]
   if whose_move == W:
@@ -109,8 +113,7 @@ def findAdmissibleMoves(state, whose_move, die1, die2):
   else:
     same_combos = [','.join((str(x),str(x - d))) for d in dice_list for x in position]
   move_combos.extend(same_combos)
-  # Add in passes
-  move_combos.append('p')
+  # Add in passes on second move
   pass_combos = [','.join((str(x),'p')) for x in position]
   move_combos.extend(pass_combos)
   # Add in moves off of the bar
@@ -125,178 +128,132 @@ def findAdmissibleMoves(state, whose_move, die1, die2):
         move_combos.append(','.join(('0', str(die2))))
       else:
         move_combos.append(','.join(('0', str(24 - die1 + 1))))
-        move_combos.append(','.join(('0', str(24 - die2 + 2))))        
+        move_combos.append(','.join(('0', str(24 - die2 + 1))))        
     else:
       move_combos.append('0,0')
+  # Add in reverses
+  r_combos = [','.join((x, 'R')) for x in move_combos]
+  move_combos.extend(r_combos)
+  # Add complete pass
+  move_combos.append('p')
   ## Remove moves that are not admissible
   admissible_moves = [i for i in move_combos if check_move(i, state, whose_move, die1, die2)]
   
   return(admissible_moves)
 
-# Check if a move is allowed (we took most of this from gameMaster)
 def check_move (move, state, whose_move, die1, die2):
-  move_list = move.split(',')
-  if len(move_list)==3 and move_list[2] in ['R','r']:
-    dice_list = [die2, die1]
-  else:
-    dice_list = [die1, die2]
-  if move == 'p':
+  if move in ["P", "p"]:
     return True
-  checker1, checker2 = move_list[:2]
-  tempState = bgstate(state)
-  for i in range(2):
-    if i == 1 and checker2 == 'p':
-      return True
-    pt = int([checker1, checker2][i])
-    die = dice_list[i]
-    # Check first for a move from the bar:
-    if pt==0:
-      # Player must have a checker on the bar.
-      if not whose_move in tempState.bar:
-        return False
-      # Player must be able to move into place off bar
-      if whose_move==W: 
-        target_point=die
-      else: 
-        target_point=25-die
-      pointList = tempState.pointLists[target_point-1]
-      if pointList!=[] and pointList[0]!=whose_move and len(pointList)>1:
-        return False
-      return True
-    # Now make sure player does NOT have a checker on the bar.
-    if any_on_bar(tempState, whose_move):
-      return False 
-    # Is checker available on point pt?
-    if pt < 1 or pt > 24:
-      return False
-    if not whose_move in tempState.pointLists[pt-1]:
-      return False
-    # Determine whether destination is legal.
-    if whose_move==W:
-      dest_pt = pt + die
-    else:
-      dest_pt = pt - die
-    if dest_pt > 24 or dest_pt < 1:
-      return bearing_off_allowed(tempState, whose_move)
-    dest_pt_list = tempState.pointLists[dest_pt-1]
-    if len(dest_pt_list) > 1 and dest_pt_list[0]!=whose_move:
-      return False
-    if(i == 0):
-      tempState = updateState(tempState, ','.join((checker1, 'p')), die1, die2, whose_move)
-  return True
-
-def updateState(state, m, die1, die2, whose_move):
-  tempState = bgstate(state)
-  moves = m.split(',')
-  # move is pass
-  if (len(moves) == 1):
-    return state
-  # not a reverse move
-  elif (len(moves) == 2):
-    pos1 = int(moves[0])
-    # check if move off the bar
-    if (pos1 == 0):
-      tempState.bar.remove(whose_move)
-      if (whose_move == W):
-        tempState.pointLists[die1 - 1].append(whose_move)
-      else:
-        tempState.pointLists[24 - die1].append(whose_move)
-    else:
-      tempState.pointLists[pos1 - 1].pop()
-      dest = getDest(pos1, die1, whose_move)
-      # check for bearing off
-      if (dest > 24 and whose_move == W):
-        tempState.white_off.append(whose_move)
-      elif (dest < 1 and whose_move == R):
-        tempState.red_off.append(whose_move)
-      else:
-        # check for hit
-        dest_pt_list = tempState.pointLists[dest - 1]
-        if (len(dest_pt_list) != 0 and dest_pt_list[0] != whose_move):
-          tempState.bar.append(dest_pt_list.pop())
-        tempState.pointLists[dest - 1].append(whose_move)
-    # pass on the second die
-    if (moves[1] == 'p'):
-      return tempState
-    # move on the second die
-    else:
-      pos2 = int(moves[1])
-      # check if move off the bar
-      if (pos2 == 0):
-        tempState.bar.remove(whose_move)
-        if (whose_move == W):
-          tempState.pointLists[die2 - 1].append(whose_move)
-        else:
-          tempState.pointLists[24 - die2].append(whose_move)
-      else:
-        tempState.pointLists[pos2 - 1].pop()
-        dest = getDest(pos2, die2, whose_move)
-        # check for bearing off
-        if (dest > 24 and whose_move == W):
-          tempState.white_off.append(whose_move)
-        elif (dest < 1 and whose_move == R):
-          tempState.red_off.append(whose_move)
-        else:
-          # check for hit
-          dest_pt_list = tempState.pointLists[dest - 1]
-          if (len(dest_pt_list) != 0 and dest_pt_list[0] != whose_move):
-            tempState.bar.append(dest_pt_list.pop())
-          tempState.pointLists[dest - 1].append(whose_move)
-      return tempState
-  # reverse move
   else:
-    pos2 = int(moves[0])  
-    pos1 = int(moves[1])
-    dest1 = getDest(pos1, die1, whose_move)
-    # check if move off the bar
-    if (pos2 == 0):
-      tempState.bar.remove(whose_move)
-      if (whose_move == W):
-        tempState.pointLists[die2 - 1].append(whose_move)
+    try:
+      move_list = move.split(',')
+      if len(move_list)==3 and move_list[2] in ['R','r']:
+        dice_list = [die2, die1]
       else:
-        tempState.pointLists[24 - die2].append(whose_move)
-      # move the second one
-      tempState.pointLists[pos1 - 1].pop()
-      if (dest1 > 24 and whose_move == W):
-        tempState.white_off.append(whose_move)
-      elif (dest1 < 1 and whose_move == R):
-        tempState.red_off.append(whose_move)
+        dice_list = [die1, die2]
+      checker1, checker2 = move_list[:2]
+    except:
+      return False
+    hold_state = bgstate(state)
+    for i in range(2):
+      # Just in case the player wants to pass after the first checker is moved:
+      if i==1 and checker2 in ['P','p']:
+        return True
+
+      pt = int([checker1, checker2][i])
+      # Check first for a move from the bar:
+      if pt==0:
+        # Player must have a checker on the bar.
+        if not whose_move in hold_state.bar:
+          return False
+        new_state = handle_move_from_bar(hold_state, whose_move, dice_list[i])
+        if not new_state:
+          return False
+        hold_state = new_state
+        continue
+      # Now make sure player does NOT have a checker on the bar.
+      if any_on_bar(hold_state, whose_move):
+        return False
+      # Is checker available on point pt?
+      if pt < 1 or pt > 24:
+        return False
+      if not whose_move in hold_state.pointLists[pt-1]:
+        return False
+      # Determine whether destination is legal.
+      die = dice_list[i]
+      if whose_move==W:
+        dest_pt = pt + die
       else:
-        # check for hit
-        dest_pt_list = tempState.pointLists[dest1 - 1]
-        if (len(dest_pt_list) != 0 and dest_pt_list[0] != whose_move):
-          tempState.bar.append(dest_pt_list.pop())
-        tempState.pointLists[dest1 - 1].append(whose_move)
-    # regular reverse move
+        dest_pt = pt - die
+      if dest_pt > 24 or dest_pt < 1:
+        born_off_state = bear_off(hold_state, pt, dest_pt, whose_move)
+        if born_off_state:
+          hold_state = born_off_state
+          continue
+        return False
+      
+      dest_pt_list = hold_state.pointLists[dest_pt-1]
+      if len(dest_pt_list) > 1 and dest_pt_list[0]!=whose_move:
+        return False
+      # So this checker's move is legal. Update the state.
+      new_state = bgstate(hold_state)
+      # Remove checker from its starting point.
+      new_state.pointLists[pt-1].pop()
+      # If the destination point contains a single opponent, it's hit.
+      new_state = hit(new_state, dest_pt_list, dest_pt)
+      # Now move the checker into the destination point.
+      new_state.pointLists[dest_pt-1].append(whose_move)
+      hold_state = new_state
+    return True
+
+def updateState(current_state, move, die1, die2, whose_move):
+  hold_state = bgstate(current_state)
+  if move in ["P", "p"]:
+    new_state = bgstate(hold_state)
+    new_state.whose_move=1-whose_move
+    return new_state
+  else:
+    move_list = move.split(',')
+    if len(move_list)==3 and move_list[2] in ['R','r']:
+      dice_list = [die2, die1]
     else:
-      dest2 = getDest(pos2, die2, whose_move)
-      tempState.pointLists[pos1 - 1].pop()
-      if (dest1 > 24 and whose_move == W):
-        tempState.white_off.append(whose_move)
-      elif (dest1 < 1 and whose_move == R):
-        tempState.red_off.append(whose_move)
+      dice_list = [die1, die2]
+    checker1, checker2 = move_list[:2]
+    for i in range(2):
+      # Just in case the player wants to pass after the first checker is moved:
+      if i==1 and checker2 in ['P','p']:
+        new_state = bgstate(hold_state)
+        new_state.whose_move=1-whose_move
+        return new_state
+      pt = int([checker1, checker2][i])
+      # Move off of bar
+      if pt==0:
+        new_state = handle_move_from_bar(hold_state, whose_move, dice_list[i])
+        hold_state = new_state
+        continue
+      # Determine whether destination is legal.
+      die = dice_list[i]
+      if whose_move==W:
+        dest_pt = pt + die
       else:
-        # check for hit
-        dest_pt_list = tempState.pointLists[dest1 - 1]
-        if (len(dest_pt_list) != 0 and dest_pt_list[0] != whose_move):
-          tempState.bar.append(dest_pt_list.pop())
-        tempState.pointLists[dest1 - 1].append(whose_move)
-      tempState.pointLists[pos2 - 1].pop()
-      if (dest2 > 24 and whose_move == W):
-        tempState.white_off.append(whose_move)
-      elif (dest2 < 1 and whose_move == R):
-        tempState.red_off.append(whose_move)
-      else:
-        # check for hit
-        dest_pt_list = tempState.pointLists[dest2 - 1]
-        if (len(dest_pt_list) != 0 and dest_pt_list[0] != whose_move):
-          tempState.bar.append(dest_pt_list.pop())
-        tempState.pointLists[dest2 - 1].append(whose_move)
-      return tempState
+        dest_pt = pt - die
+      if dest_pt > 24 or dest_pt < 1:
+        born_off_state = bear_off(hold_state, pt, dest_pt, whose_move)
+        if born_off_state:
+          hold_state = born_off_state
+          continue
+      dest_pt_list = hold_state.pointLists[dest_pt-1]
+      # So this checker's move is legal. Update the state.
+      new_state = bgstate(hold_state)
+      # Remove checker from its starting point.
+      new_state.pointLists[pt-1].pop()
+      # If the destination point contains a single opponent, it's hit.
+      new_state = hit(new_state, dest_pt_list, dest_pt)
+      # Now move the checker into the destination point.
+      new_state.pointLists[dest_pt-1].append(whose_move)
+      hold_state = new_state
+    return hold_state
 
-
-def getDest(pos, die, whose_move):
-  return (pos + die) if (whose_move == W) else (pos - die)
 
 def bearing_off_allowed(state, who):
   # True provided no checkers of this color on the bar or in
@@ -312,3 +269,72 @@ def bearing_off_allowed(state, who):
 
 def any_on_bar(state, who):
   return who in state.bar
+
+def handle_move_from_bar(state, who, die):
+  # We assume there is a piece of this color available on the bar.
+  if who==W: target_point=die
+  else: target_point=25-die
+  pointList = state.pointLists[target_point-1]
+  if pointList!=[] and pointList[0]!=who and len(pointList)>1:
+     return False
+  new_state = bgstate(state)
+  new_state = hit(new_state, pointList, target_point)
+  remove_from_bar(new_state, who)
+  new_state.pointLists[target_point-1].append(who)
+  return new_state
+
+def remove_from_bar(new_state, who):
+  #removes a white from start of bar list,
+  # or a red from the end of the bar list.
+  if who==W:
+    del new_state.bar[0]
+  else:
+    new_state.bar.pop()
+
+
+def hit(new_state, dest_pt_list, dest_pt):
+  opponent = 1-new_state.whose_move
+  if len(dest_pt_list)==1 and dest_pt_list[0]==opponent:
+    if opponent==W:
+      new_state.bar.insert(W, 0) # Whites at front of bar
+    else:
+      new_state.bar.append(R) # Reds at end of bar
+    new_state.pointLists[dest_pt-1]=[]
+  return new_state
+
+def bear_off(state, src_pt, dest_pt, who):
+  # Return False if 'who' is not allowed to bear off this way.
+  # Otherwise, create the new state showing the result of bearing
+  # this one checker off, and return the new state.
+
+  # First of all, is bearing off allowed, regardless of the dice roll?
+  if not bearing_off_allowed(state, who): return False
+  # Direct bear-off, if possible:
+  pl = state.pointLists[src_pt-1]
+  if pl==[] or pl[0]!=who:
+    return False
+  # So there is a checker to possibly bear off.
+  # If it does not go exactly off, then there must be
+  # no pieces of the same color behind it, and dest
+  # can only be one further away.
+  good = False
+  if who==W:
+    if dest_pt==25:
+       good = True
+    elif dest_pt==26:
+       for point in range(18,src_pt-1):
+         if W in state.pointLists[point]: return False
+       good = True
+  elif who==R:
+    if dest_pt==0:
+       good = True
+    elif dest_pt== -1:
+       for point in range(src_pt, 6):
+         if R in state.pointLists[point]: return False
+       good = True
+  if not good: return False 
+  born_off_state = bgstate(state)
+  born_off_state.pointLists[src_pt-1].pop()
+  if who==W: born_off_state.white_off.append(W)
+  else:  born_off_state.red_off.append(R)
+  return born_off_state

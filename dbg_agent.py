@@ -110,6 +110,10 @@ def staticEval(state):
   ## Number on the bar
   net += state.bar.count(W)*-24
   net += state.bar.count(R)*24
+
+  ## Number off
+  net += len(state.white_off)*25
+  net += len(state.red_off)*-25
   return(net)
 
 def findAdmissibleMoves(state, whose_move, die1, die2):
