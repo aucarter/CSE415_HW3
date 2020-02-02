@@ -32,7 +32,7 @@ class Agent:
 
   def move(self, state, die1, die2):
     # Returns the best move found through expectiMiniMax algorithm
-    ans = self.expectiMiniMax(state = state, whose_move = state.whose_move, max_depth = 3, die1 = die1, die2 = die2, depth = 0)
+    ans = self.expectiMiniMax(state = state, whose_move = state.whose_move, max_depth = 1, die1 = die1, die2 = die2, depth = 0)
     return ans
 
   def setMaxPly(self, maxply=-1):
@@ -50,10 +50,10 @@ class Agent:
     if(depth == max_depth):
       return staticEval(state)
     admis_moves = findAdmissibleMoves(state, whose_move, die1, die2)
+    prev_die1 = die1
+    prev_die2 = die2
     for m in admis_moves:
       val = 0
-      prev_die1 = die1
-      prev_die2 = die2
       for die1 in range(1, 7):
         for die2 in range(1, 7):
           val += checkProb(die1, die2) * self.expectiMiniMax(updateState(state, m, prev_die1, prev_die2, whose_move), 1 - whose_move, max_depth, die1, die2, depth + 1)
@@ -77,6 +77,7 @@ class Agent:
     
 def checkProb(die1, die2):
   return 1.0 / 36
+
 def staticEval(state):
   # Takes in state and returns a real number that is positive when good for
   # maximizing player (white) and negative when relatively good for the 
