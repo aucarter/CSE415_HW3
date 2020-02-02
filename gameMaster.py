@@ -59,6 +59,7 @@ agent2 = dbg_agent.Agent()
 TIME_LIMIT=3.0 # 2 seconds.
 
 DETERMINISTIC = True
+PASS = 0
 # for the deterministic version, where the dice are loaded in a way
 # that prevents all randomness.
 
@@ -105,6 +106,9 @@ def run(agent1, agent2, max_secs_per_move, initial_state=bgstate(), deterministi
       forfeit(whose_move)
       break;
     if move in ["P", "p"]:
+      PASS += 1
+      if(PASS == 3):
+        forfeit(whose_move)
       print('Agent '+get_color(whose_move)+' passes.')
       if moves_exist(current_state, whose_move, die1, die2):
         print("Moves exist. Passing is not allowed. You lose.")
@@ -117,6 +121,7 @@ def run(agent1, agent2, max_secs_per_move, initial_state=bgstate(), deterministi
         current_state = new_state
         continue
     else:
+      PASS = 0
       try:
         move_list = move.split(',')
         if len(move_list)==3 and move_list[2] in ['R','r']:
