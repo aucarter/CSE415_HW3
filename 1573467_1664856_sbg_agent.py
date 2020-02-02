@@ -1,4 +1,4 @@
-'''dbg_agent.py
+'''sbg_agent.py
 This Backgammon player implements the expectiMinimax and Alpha-Beta pruning algorithms
 in identifying the best move in the Deterministic Simplified Backgammon game.
 
@@ -32,7 +32,7 @@ class Agent:
 
   def move(self, state, die1, die2):
     # Returns the best move found through expectiMiniMax algorithm
-    ans = self.expectiMiniMax(state = state, whose_move = state.whose_move, max_depth = 1, die1 = die1, die2 = die2, depth = 0)
+    ans = self.expectiMiniMax(state = state, whose_move = state.whose_move, max_depth = 3, die1 = die1, die2 = die2, depth = 0)
     return ans
 
   def setMaxPly(self, maxply=-1):

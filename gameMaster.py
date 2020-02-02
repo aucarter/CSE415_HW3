@@ -53,9 +53,9 @@ outcomes.  This is useful in terms of allowing alpha-beta pruning to
 make sense.
 '''
 
-import sbg_agent
-agent1 = sbg_agent.Agent()
-agent2 = sbg_agent.Agent()
+import 1573467_1664856_sbg_agent
+agent1 = 1573467_1664856_sbg_agent.Agent()
+agent2 = 1573467_1664856_sbg_agent.Agent()
 TIME_LIMIT=3.0 # 2 seconds.
 
 DETERMINISTIC = False
